@@ -1,0 +1,119 @@
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <div class="brand-mark">
+      <img src="assets/logolobo.svg" alt="ByteSave">
+      <div>
+        <h1>ByteSave</h1>
+        <p>Gestão de tarefas</p>
+      </div>
+    </div>
+
+    <div class="user-card">
+      <span class="user-initials">{{ userInitials }}</span>
+      <div>
+        <strong>{{ userName }}</strong>
+        <p>Painel pessoal</p>
+      </div>
+    </div>
+
+    <div class="sidebar-actions">
+      <button type="button" class="sidebar-link" (click)="scrollToTaskForm()">Nova tarefa</button>
+      <button type="button" class="sidebar-link" (click)="clearCompleted()">Limpar concluídas</button>
+      <button type="button" class="sidebar-link danger" (click)="logout()">Sair</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <div>
+        <h2>Dashboard</h2>
+        <p>Visão rápida das suas tarefas.</p>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="ghost-button" (click)="taskService.refreshTasks()">Atualizar</button>
+        <button type="button" class="primary-button" (click)="scrollToTaskForm()">Nova tarefa</button>
+      </div>
+    </header>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span>Total</span>
+        <strong>{{ totalTasks }}</strong>
+      </article>
+      <article class="stat-card">
+        <span>Concluídas</span>
+        <strong>{{ doneTasks }}</strong>
+      </article>
+      <article class="stat-card">
+        <span>Pendentes</span>
+        <strong>{{ pendingTasks }}</strong>
+      </article>
+    </section>
+
+    <section class="toolbar-card">
+      <input type="text" placeholder="Buscar tarefa ou categoria" [(ngModel)]="searchTerm">
+      <div class="toolbar-filters">
+        <select [(ngModel)]="selectedCategory" name="categoryFilter">
+          <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+        </select>
+        <select [(ngModel)]="statusFilter" name="statusFilter">
+          <option *ngFor="let status of statusOptions" [value]="status.value">{{ status.label }}</option>
+        </select>
+        <select [(ngModel)]="sortMode" name="sortMode">
+          <option *ngFor="let sort of sortOptions" [value]="sort.value">{{ sort.label }}</option>
+        </select>
+        <button type="button" class="ghost-button" (click)="resetFilters()">Limpar</button>
+      </div>
+    </section>
+
+    <section class="task-form-section" id="taskFormSection">
+      <div class="section-head">
+        <h3>Nova tarefa</h3>
+        <p>Adicione e organize rapidamente.</p>
+      </div>
+      <form id="taskForm" (ngSubmit)="createTask()">
+        <input type="text" placeholder="Título" [(ngModel)]="newTitle" name="title">
+        <input type="text" placeholder="Categoria" [(ngModel)]="newCategory" name="category">
+        <select [(ngModel)]="newPriority" name="priority">
+          <option value="Baixa">Baixa</option>
+          <option value="Média">Média</option>
+          <option value="Alta">Alta</option>
+        </select>
+        <button type="submit" [disabled]="taskService.loading() || !newTitle.trim() || !newCategory.trim()">Adicionar</button>
+      </form>
+    </section>
+
+    <section class="list-section">
+      <div class="section-head">
+        <h3>Tarefas</h3>
+        <p>{{ filteredTasks.length }} itens</p>
+      </div>
+
+      <div class="empty-state" *ngIf="filteredTasks.length === 0">
+        <h4>{{ filteredEmptyMessage }}</h4>
+        <button type="button" class="primary-button" (click)="scrollToTaskForm()">Criar tarefa</button>
+      </div>
+
+      <div class="task-grid" *ngIf="filteredTasks.length > 0">
+        <article class="task-card" *ngFor="let task of filteredTasks; trackBy: trackByTaskId">
+          <div class="task-top">
+            <span class="badge" [class.done]="task.completed" [class.pending]="!task.completed">
+              {{ task.completed ? 'Concluída' : 'Pendente' }}
+            </span>
+            <span class="priority" [class.low]="task.priority === 'Baixa'" [class.medium]="task.priority === 'Média'" [class.high]="task.priority === 'Alta'">
+              {{ task.priority }}
+            </span>
+          </div>
+          <h3 [class.completed-title]="task.completed">{{ task.title }}</h3>
+          <p>{{ task.category }}</p>
+          <div class="task-actions">
+            <button type="button" [class.btn-concluir]="!task.completed" [class.btn-reabrir]="task.completed" (click)="toggleTask(task.id)">
+              {{ task.completed ? 'Reabrir' : 'Concluir' }}
+            </button>
+            <button type="button" class="btn-excluir" (click)="deleteTask(task.id)">Excluir</button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+</div>

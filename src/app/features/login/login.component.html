@@ -1,0 +1,30 @@
+<div class="container">
+  <div class="features-side">
+    <div class="logo-area">
+      <div class="logo"><img src="assets/logolobo.svg" alt="ByteSave Logo"></div>
+      <div>
+        <span class="brand-name">ByteSave</span>
+        <p class="side-copy">Acesse sua conta para continuar.</p>
+      </div>
+    </div>
+    <p class="features-note">Uma interface limpa para manter o foco nas suas tarefas.</p>
+  </div>
+  <div class="auth-side">
+    <span class="eyebrow">Acesso</span>
+    <h2 class="auth-title">Entrar</h2>
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label class="form-label">E-MAIL</label>
+        <input type="email" [(ngModel)]="email" name="email" class="form-input" placeholder="seu@email.com" (input)="validateEmail()">
+        <p class="input-error" *ngIf="emailError">{{ emailError }}</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">SENHA</label>
+        <input type="password" [(ngModel)]="password" name="password" class="form-input" placeholder="********" (input)="validatePassword()">
+        <p class="input-error" *ngIf="passwordError">{{ passwordError }}</p>
+      </div>
+      <button type="submit" class="btn-login" [disabled]="isLoading">{{ isLoading ? 'ENTRANDO...' : 'ENTRAR' }}</button>
+    </form>
+    <a routerLink="/register" class="btn-create">Criar conta</a>
+  </div>
+</div>
