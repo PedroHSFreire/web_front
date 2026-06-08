@@ -91,6 +91,10 @@ export class AuthService {
     this._currentUser.set(null);
   }
 
+  hasStoredToken(): boolean {
+    return Boolean(localStorage.getItem('auth_token'));
+  }
+
   isLoggedIn(): boolean {
     return this._currentUser() !== null;
   }

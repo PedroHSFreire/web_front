@@ -48,7 +48,13 @@ export class DashboardComponent implements OnInit {
     private toast: ToastService
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    const authenticated = await this.auth.ensureCurrentUser();
+    if (!authenticated) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.taskService.loadTasks();
   }
 
