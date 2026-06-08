@@ -141,21 +141,23 @@ export class DashboardComponent implements OnInit {
       .toUpperCase();
   }
 
-  createTask() {
+  async createTask() {
     if (!this.newTitle.trim() || !this.newCategory.trim()) {
       this.toast.show('Preencha título e categoria', 'error');
       return;
     }
 
-    this.taskService.createTask({
+    const createdTask = await this.taskService.createTask({
       title: this.newTitle.trim(),
       category: this.newCategory.trim(),
       priority: this.newPriority
-    }).then(() => {
+    });
+
+    if (createdTask) {
       this.newTitle = '';
       this.newCategory = '';
       this.newPriority = 'Média';
-    });
+    }
   }
 
   toggleTask(id: number) {

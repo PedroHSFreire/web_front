@@ -4,6 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { Task } from '../models/task.model';
 import { ToastService } from './toast.service';
 import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
@@ -14,7 +16,12 @@ export class TaskService {
   public tasks = this._tasks.asReadonly();
   public loading = this._loading.asReadonly();
 
-  constructor(private http: HttpClient, private toast: ToastService) {}
+  constructor(
+    private http: HttpClient,
+    private toast: ToastService,
+    private auth: AuthService,
+    private router: Router
+  ) {}
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('auth_token');
@@ -143,10 +150,21 @@ export class TaskService {
 
   private handleError(error: unknown) {
     if (error instanceof HttpErrorResponse) {
+      if (error.status === 401) {
+        this.handleUnauthorized();
+        return;
+      }
+
       const message = error.error?.erro || error.message;
       this.toast.show(`Erro: ${message}`, 'error');
     } else {
       this.toast.show('Ocorreu um erro inesperado', 'error');
     }
+  }
+
+  private handleUnauthorized() {
+    this.toast.show('Sua sessão expirou. Faça login novamente.', 'error');
+    this.auth.logout();
+    this.router.navigate(['/login']);
   }
 }
