@@ -55,7 +55,7 @@ export class RegisterComponent {
     this.isLoading = false;
 
     if (success) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/dashboard']);
     }
   }
 }

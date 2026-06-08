@@ -40,13 +40,17 @@ export class AuthService {
   async register(nome: string, email: string, password: string): Promise<boolean> {
     try {
       const response = await firstValueFrom(
-        this.http.post<{ success: boolean; message: string }>(`${this.API_BASE}/auth/register`, {
+        this.http.post<{ success: boolean; token?: string; user?: User }>(`${this.API_BASE}/auth/register`, {
           nome,
           email,
           senha: password
         })
       );
       if (response.success) {
+        if (response.token && response.user) {
+          localStorage.setItem('auth_token', response.token);
+          this._currentUser.set(response.user);
+        }
         this.toast.show('Conta criada com sucesso!', 'success');
         return true;
       }
