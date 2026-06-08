@@ -64,6 +64,10 @@ export class AuthService {
 
   async ensureCurrentUser(): Promise<boolean> {
     try {
+      if (this._currentUser()) {
+        return true;
+      }
+
       const token = localStorage.getItem('auth_token');
       if (!token) {
         return false;
