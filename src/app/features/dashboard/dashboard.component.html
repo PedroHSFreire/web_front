@@ -17,7 +17,6 @@
     </div>
 
     <div class="sidebar-actions">
-      <button type="button" class="sidebar-link" (click)="scrollToTaskForm()">Nova tarefa</button>
       <button type="button" class="sidebar-link" (click)="clearCompleted()">Limpar concluídas</button>
       <button type="button" class="sidebar-link danger" (click)="logout()">Sair</button>
     </div>
@@ -31,7 +30,6 @@
       </div>
       <div class="topbar-actions">
         <button type="button" class="ghost-button" (click)="taskService.refreshTasks()">Atualizar</button>
-        <button type="button" class="primary-button" (click)="scrollToTaskForm()">Nova tarefa</button>
       </div>
     </header>
 
@@ -94,7 +92,6 @@
 
       <div class="empty-state" *ngIf="filteredTasks.length === 0">
         <h4>{{ filteredEmptyMessage }}</h4>
-        <button type="button" class="primary-button" (click)="scrollToTaskForm()">Criar tarefa</button>
       </div>
 
       <div class="task-grid" *ngIf="filteredTasks.length > 0">
