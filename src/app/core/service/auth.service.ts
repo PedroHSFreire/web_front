@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { User } from '../models/user.model';
 import { ToastService } from './toast.service';
@@ -13,6 +13,7 @@ export class AuthService {
   public currentUser = this._currentUser.asReadonly();
 
   constructor(private http: HttpClient, private toast: ToastService) {
+    this.restoreSession();
   }
 
   async login(email: string, password: string): Promise<boolean> {
@@ -25,6 +26,7 @@ export class AuthService {
       );
       if (response.success) {
         localStorage.setItem('auth_token', response.token);
+        localStorage.setItem('auth_user', JSON.stringify(response.user));
         this._currentUser.set(response.user);
         this.toast.show('Login realizado com sucesso!', 'success');
         return true;
@@ -49,6 +51,7 @@ export class AuthService {
       if (response.success) {
         if (response.token && response.user) {
           localStorage.setItem('auth_token', response.token);
+          localStorage.setItem('auth_user', JSON.stringify(response.user));
           this._currentUser.set(response.user);
         }
         this.toast.show('Conta criada com sucesso!', 'success');
@@ -62,36 +65,9 @@ export class AuthService {
     }
   }
 
-  async ensureCurrentUser(): Promise<boolean> {
-    try {
-      if (this._currentUser()) {
-        return true;
-      }
-
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        return false;
-      }
-
-      const response = await firstValueFrom(
-        this.http.get<{ success: boolean; user: User }>(`${this.API_BASE}/auth/me`, {
-          headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` })
-        })
-      );
-      if (response.success) {
-        this._currentUser.set(response.user);
-        return true;
-      }
-      this.logout();
-      return false;
-    } catch (error) {
-      this.logout();
-      return false;
-    }
-  }
-
   logout(): void {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
     this._currentUser.set(null);
   }
 
@@ -101,5 +77,21 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return this._currentUser() !== null;
+  }
+
+  private restoreSession(): void {
+    const userRaw = localStorage.getItem('auth_user');
+    if (!userRaw) {
+      return;
+    }
+
+    try {
+      const user = JSON.parse(userRaw) as User;
+      if (user?.nome && user?.email) {
+        this._currentUser.set(user);
+      }
+    } catch {
+      localStorage.removeItem('auth_user');
+    }
   }
 }

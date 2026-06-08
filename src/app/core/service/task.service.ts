@@ -4,8 +4,6 @@ import { firstValueFrom } from 'rxjs';
 import { Task } from '../models/task.model';
 import { ToastService } from './toast.service';
 import { environment } from '../../../environments/environment';
-import { AuthService } from './auth.service';
-import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
@@ -16,12 +14,7 @@ export class TaskService {
   public tasks = this._tasks.asReadonly();
   public loading = this._loading.asReadonly();
 
-  constructor(
-    private http: HttpClient,
-    private toast: ToastService,
-    private auth: AuthService,
-    private router: Router
-  ) {}
+  constructor(private http: HttpClient, private toast: ToastService) {}
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('auth_token');
@@ -116,6 +109,30 @@ export class TaskService {
     }
   }
 
+  async updateTask(id: number, task: Omit<Task, 'id' | 'completed'>): Promise<Task | null> {
+    this._loading.set(true);
+    try {
+      const response = await firstValueFrom(
+        this.http.put<{ success: boolean; task: Task }>(`${this.API_BASE}/tasks/${id}`, task, {
+          headers: this.getHeaders()
+        })
+      );
+      if (response.success) {
+        this._tasks.update(tasks =>
+          tasks.map(t => t.id === id ? response.task : t)
+        );
+        this.toast.show('Tarefa atualizada com sucesso!', 'success');
+        return response.task;
+      }
+      return null;
+    } catch (error) {
+      this.handleError(error);
+      return null;
+    } finally {
+      this._loading.set(false);
+    }
+  }
+
   async clearCompleted(): Promise<void> {
     const completedTasks = this._tasks().filter(task => task.completed);
     if (completedTasks.length === 0) {
@@ -163,8 +180,6 @@ export class TaskService {
   }
 
   private handleUnauthorized() {
-    this.toast.show('Sua sessão expirou. Faça login novamente.', 'error');
-    this.auth.logout();
-    this.router.navigate(['/login']);
+    this.toast.show('Não foi possível acessar as tarefas agora. Tente novamente.', 'error');
   }
 }

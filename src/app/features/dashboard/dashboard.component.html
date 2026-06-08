@@ -68,8 +68,8 @@
 
     <section class="task-form-section" id="taskFormSection">
       <div class="section-head">
-        <h3>Nova tarefa</h3>
-        <p>Adicione e organize rapidamente.</p>
+        <h3>{{ editingTaskId ? 'Editar tarefa' : 'Nova tarefa' }}</h3>
+        <p>{{ editingTaskId ? 'Altere os dados e salve a atualização.' : 'Adicione e organize rapidamente.' }}</p>
       </div>
       <form id="taskForm" (ngSubmit)="createTask()">
         <input type="text" placeholder="Título" [(ngModel)]="newTitle" name="title">
@@ -79,7 +79,10 @@
           <option value="Média">Média</option>
           <option value="Alta">Alta</option>
         </select>
-        <button type="submit" [disabled]="taskService.loading() || !newTitle.trim() || !newCategory.trim()">Adicionar</button>
+        <button type="submit" [disabled]="taskService.loading() || !newTitle.trim() || !newCategory.trim()">
+          {{ editingTaskId ? 'Salvar alterações' : 'Adicionar' }}
+        </button>
+        <button type="button" class="ghost-button cancel-edit" *ngIf="editingTaskId !== null" (click)="cancelEdit()">Cancelar</button>
       </form>
     </section>
 
@@ -107,6 +110,7 @@
           <h3 [class.completed-title]="task.completed">{{ task.title }}</h3>
           <p>{{ task.category }}</p>
           <div class="task-actions">
+            <button type="button" class="btn-editar" (click)="startEdit(task)">Editar</button>
             <button type="button" [class.btn-concluir]="!task.completed" [class.btn-reabrir]="task.completed" (click)="toggleTask(task.id)">
               {{ task.completed ? 'Reabrir' : 'Concluir' }}
             </button>

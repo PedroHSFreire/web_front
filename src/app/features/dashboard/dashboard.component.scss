@@ -149,6 +149,7 @@
 .ghost-button,
 .primary-button,
 #taskForm button,
+.btn-editar,
 .btn-concluir,
 .btn-reabrir,
 .btn-excluir {
@@ -268,6 +269,11 @@
   align-self: stretch;
 }
 
+#taskForm .cancel-edit {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
 .task-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -345,11 +351,17 @@
   margin-top: 14px;
 }
 
+.btn-editar,
 .btn-concluir,
 .btn-reabrir,
 .btn-excluir {
   flex: 1;
   padding: 11px 12px;
+}
+
+.btn-editar {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
 }
 
 .btn-concluir {

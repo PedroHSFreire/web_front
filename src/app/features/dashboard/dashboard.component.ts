@@ -21,6 +21,7 @@ export class DashboardComponent implements OnInit {
   newTitle = '';
   newCategory = '';
   newPriority: Task['priority'] = 'Média';
+  editingTaskId: number | null = null;
   searchTerm = '';
   selectedCategory = 'Todas';
   statusFilter: TaskStatusFilter = 'all';
@@ -49,12 +50,6 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    const authenticated = await this.auth.ensureCurrentUser();
-    if (!authenticated) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
     this.taskService.loadTasks();
   }
 
@@ -147,6 +142,19 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
+    if (this.editingTaskId !== null) {
+      const updatedTask = await this.taskService.updateTask(this.editingTaskId, {
+        title: this.newTitle.trim(),
+        category: this.newCategory.trim(),
+        priority: this.newPriority
+      });
+
+      if (updatedTask) {
+        this.cancelEdit();
+      }
+      return;
+    }
+
     const createdTask = await this.taskService.createTask({
       title: this.newTitle.trim(),
       category: this.newCategory.trim(),
@@ -158,6 +166,21 @@ export class DashboardComponent implements OnInit {
       this.newCategory = '';
       this.newPriority = 'Média';
     }
+  }
+
+  startEdit(task: Task) {
+    this.editingTaskId = task.id;
+    this.newTitle = task.title;
+    this.newCategory = task.category;
+    this.newPriority = task.priority;
+    this.scrollToTaskForm();
+  }
+
+  cancelEdit() {
+    this.editingTaskId = null;
+    this.newTitle = '';
+    this.newCategory = '';
+    this.newPriority = 'Média';
   }
 
   toggleTask(id: number) {
